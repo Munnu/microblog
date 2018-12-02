@@ -1,3 +1,5 @@
+from flask import render_template
+
 # import 'app' variable from the app package (this package)
 from app import app
 
@@ -5,12 +7,5 @@ from app import app
 @app.route('/index')
 def index():
     user = {'username': 'Miguel'}
-    return '''
-    <html>
-        <head>
-            <title>Home Page - Microblog</title>
-        </head>
-        <body>
-            <h1>Hello, ''' + user['username'] + '''!</h1>
-        </body>
-    </html>'''
+    # user(left hand side) is a kwarg, user (right hand side) is the variable above
+    return render_template('index.html', title='Home', user=user)
