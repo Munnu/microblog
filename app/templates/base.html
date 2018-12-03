@@ -10,7 +10,16 @@
         <div>
             Microblog:
             <a href="{{ url_for('index') }}">Home</a>
+            {% if current_user.is_anonymous %}
             <a href="{{ url_for('login') }}">Login</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+            <!-- The is_anonymous property is one of the attributes that 
+            Flask-Login adds to user objects through the UserMixin class. 
+            The current_user.is_anonymous expression is going to be True 
+            only when the user is not logged in. -->
+
         </div>
         <hr>
         <!-- Here I'm using a with construct to assign the result of 

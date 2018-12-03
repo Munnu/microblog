@@ -1,4 +1,5 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
+from werkzeug.urls import url_parse
 
 # import 'app' variable from the app package (this package)
 from app import app
@@ -7,14 +8,14 @@ from app import app
 from app.forms import LoginForm
 
 # flask login stuff
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
 
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
-    user = {'username': 'Miguel'}
     posts = [
         {
             'author': {'username': 'John'},
@@ -26,7 +27,7 @@ def index():
         }
     ]
     # user(left hand side) is a kwarg, user (right hand side) is the variable above
-    return render_template('index.html', title='Home', user=user, posts=posts)
+    return render_template('index.html', title='Home', posts=posts)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -45,7 +46,24 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
+        # get the arg called 'next' in the url
+        # and whatever it's set to. next_page will be a dict, k, v of
+        # {'next': <url or relative page path>}
+        next_page = request.args.get('next')
+
+        # if the login url does not have the 'next' argument
+        # or url set to a relative path is null 
+        # return to index; netloc is a security measure
+        # to ensure that the url is within our current domain
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
     # send the instantiated LoginForm object to the view (template)
     # form (lhs) is the jinja template var name (kwarg), form (rhs) is the variable above
     return render_template('login.html', title='Sign In', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
