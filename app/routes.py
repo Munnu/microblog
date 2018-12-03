@@ -6,6 +6,10 @@ from app import app
 # import LoginForm from forms.py
 from app.forms import LoginForm
 
+# flask login stuff
+from flask_login import current_user, login_user
+from app.models import User
+
 
 @app.route('/')
 @app.route('/index')
@@ -27,14 +31,20 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+      
     # instantiate a LoginForm object
     form = LoginForm()
 
     # Call validate() only if the form is submitted.
     # This is a shortcut for form.is_submitted() and form.validate()
     if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     # send the instantiated LoginForm object to the view (template)
     # form (lhs) is the jinja template var name (kwarg), form (rhs) is the variable above
