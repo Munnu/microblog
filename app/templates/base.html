@@ -7,8 +7,27 @@
       {% endif %}
     </head>
     <body>
-        <div>Microblog: <a href="/index">Home</a></div>
+        <div>
+            Microblog:
+            <a href="/index">Home</a>
+            <a href="/login">Login</a>
+        </div>
         <hr>
+        <!-- Here I'm using a with construct to assign the result of 
+        calling get_flashed_messages() to a messages variable, 
+        all in the context of the template. 
+        The get_flashed_messages() function comes from Flask, 
+        and returns a list of all the messages that 
+        have been registered with flash() -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </body>
 </html>
